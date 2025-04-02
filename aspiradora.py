@@ -1,11 +1,13 @@
 import time
 import random
 
-class AspiradoraRobot:
+class AspiradoraReactiva:
     def __init__(self, tamano_mapa=(5, 5)):
         self.tamano_mapa = tamano_mapa
         self.mapa = [[random.choice(["limpio", "sucio", "sucio"]) for _ in range(tamano_mapa[1])] for _ in range(tamano_mapa[0])]
         self.posicion = (0, 0)
+        self.estado = "buscando"
+        self.direccion = "derecha"
         self.visitados = set()
 
     def mostrar_mapa(self):
@@ -18,30 +20,39 @@ class AspiradoraRobot:
                 else:
                     print("O", end=" ")
             print()
+        print(f"Estado: {self.estado}")
         print("-" * 20)
 
     def limpiar(self):
         x, y = self.posicion
-        self.visitados.add((x, y))
         if self.mapa[x][y] == "sucio":
             self.mapa[x][y] = "limpio"
+            self.estado = "limpiando"
             print(f"Limpieza en ({x}, {y})")
         else:
-            print(f"({x}, {y}) ya está limpio")
+            self.estado = "buscando"
+        self.visitados.add((x, y))
 
     def mover(self):
         x, y = self.posicion
-        movimientos_posibles = []
-        prioridades = [(x + 1, y), (x, y + 1), (x - 1, y), (x, y - 1)]  # Abajo, Adelante, Arriba, Atrás
+        if len(self.visitados) == self.tamano_mapa[0] * self.tamano_mapa[1]:
+            return  # Si todas las celdas fueron visitadas, no seguir moviéndose
         
-        for movimiento in prioridades:
-            if 0 <= movimiento[0] < self.tamano_mapa[0] and 0 <= movimiento[1] < self.tamano_mapa[1] and movimiento not in self.visitados:
-                movimientos_posibles.append(movimiento)
-        
-        if movimientos_posibles:
-            self.posicion = movimientos_posibles[0]  # Prioriza la primera opción disponible
-        else:
-            self.posicion = random.choice(prioridades)  # Si ya visitó todo, moverse aleatoriamente
+        if self.direccion == "derecha":
+            if y + 1 < self.tamano_mapa[1]:
+                self.posicion = (x, y + 1)
+            else:
+                if x + 1 < self.tamano_mapa[0]:
+                    self.posicion = (x + 1, y)
+                    self.direccion = "izquierda"
+        elif self.direccion == "izquierda":
+            if y - 1 >= 0:
+                self.posicion = (x, y - 1)
+            else:
+                if x + 1 < self.tamano_mapa[0]:
+                    self.posicion = (x + 1, y)
+                    self.direccion = "derecha"
+        self.estado = "moviendo"
 
     def iniciar(self):
         while any("sucio" in fila for fila in self.mapa):
@@ -53,5 +64,5 @@ class AspiradoraRobot:
         print("Limpieza terminada")
 
 if __name__ == "__main__":
-    robot = AspiradoraRobot()
+    robot = AspiradoraReactiva()
     robot.iniciar()
