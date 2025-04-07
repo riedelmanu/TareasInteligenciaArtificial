@@ -65,4 +65,4 @@ class AspiradoraReactiva:
 
 if __name__ == "__main__":
     robot = AspiradoraReactiva()
-    robot.iniciar()
+    robot.iniciar() 
