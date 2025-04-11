@@ -1,4 +1,5 @@
 from simpleai.search import SearchProblem, greedy
+from simpleai.search import astar
 from simpleai.search.viewers import WebViewer
 
 
@@ -58,7 +59,7 @@ class RomaniaProblem(SearchProblem):
 
 
 problem = RomaniaProblem(initial_state='Arad')
-result = greedy(problem, graph_search=True, viewer=WebViewer())
+result = astar(problem, graph_search=True, viewer=WebViewer())
 
 print(result.state)
 print(result.path())
