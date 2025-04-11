@@ -1,5 +1,6 @@
-from simpleai.search import SearchProblem, breadth_first
+from simpleai.search import SearchProblem, greedy
 from simpleai.search.viewers import WebViewer
+
 
 GOAL = "Bucharest"
 
@@ -57,7 +58,7 @@ class RomaniaProblem(SearchProblem):
 
 
 problem = RomaniaProblem(initial_state='Arad')
-result = breadth_first(problem, graph_search=False, viewer=WebViewer())
+result = greedy(problem, graph_search=True, viewer=WebViewer())
 
 print(result.state)
 print(result.path())
