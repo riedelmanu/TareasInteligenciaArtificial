@@ -1,4 +1,4 @@
-from simpleai.search import SearchProblem, astar
+from simpleai.search import SearchProblem, breadth_first
 import time
 
 OBJETIVO = (
@@ -13,10 +13,8 @@ estado_inicial = (
     (7, 0, 8)
 )
 
-
 class ProblemaPuzzle(SearchProblem):
-    def __init__(self, estado_inicial, tipo_heuristica):
-        self.tipo_heuristica = tipo_heuristica
+    def __init__(self, estado_inicial):
         super().__init__(estado_inicial)
 
     def actions(self, estado):
@@ -53,39 +51,40 @@ class ProblemaPuzzle(SearchProblem):
         return estado == OBJETIVO
 
     def cost(self, estado1, accion, estado2):
-        return 1
+        return 1  
 
-    def heuristic(self, estado):
-        if self.tipo_heuristica == 'fichas_fuera_de_lugar':
-            return sum(
-                1 for f in range(3) for c in range(3)
-                if estado[f][c] != 0 and estado[f][c] != OBJETIVO[f][c]
-            )
-
-        elif self.tipo_heuristica == 'manhattan':
-            total = 0
-            for f in range(3):
-                for c in range(3):
-                    valor = estado[f][c]
-                    if valor != 0:
-                        fila_objetivo = (valor - 1) // 3
-                        col_objetivo = (valor - 1) % 3
-                        total += abs(fila_objetivo - f) + abs(col_objetivo - c)
-            return total
-
-for heuristica in ['fichas_fuera_de_lugar', 'manhattan']:
-    print(f"\nUsando heurística: {heuristica}")
-    problema = ProblemaPuzzle(estado_inicial, tipo_heuristica=heuristica)
-
+def ejecutar_busqueda(algoritmo, problema):
+    print(f"\nEjecutando {algoritmo.__name__}")
     inicio = time.time()
-    resultado = astar(problema)
+    resultado = algoritmo(problema)
     fin = time.time()
+    print(f"Camino encontrado: {[accion for accion, _ in resultado.path()[1:]]}")
+    print(f"Cantidad de pasos: {len(resultado.path()) - 1}")
+    print(f"Tiempo de ejecución: {fin - inicio:.6f} segundos")
 
-    print("Cantidad de pasos:", len(resultado.path()) - 1)
-    print("Tiempo total: {:.4f} segundos".format(fin - inicio))
-    print("Secuencia de movimientos:")
-    for accion, estado in resultado.path():
-        print("Movimiento:", accion)
-        for fila in estado:
-            print(fila)
-        print()
+# diferentes estados iniciales
+estados_iniciales = [
+    (
+        (1, 2, 3),
+        (4, 5, 6),
+        (7, 0, 8)
+    ),
+    (
+        (1, 2, 3),
+        (4, 0, 5),
+        (7, 8, 6)
+    ),
+    (
+        (2, 0, 3),
+        (1, 4, 6),
+        (7, 5, 8)
+    )
+]
+
+for estado in estados_iniciales:
+    print(f"\nEstado inicial:")
+    for fila in estado:
+        print(fila)
+
+    problema = ProblemaPuzzle(estado)
+    ejecutar_busqueda(breadth_first, problema)
