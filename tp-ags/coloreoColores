@@ -1,0 +1,81 @@
+import random
+
+neighbors = {
+    0: [1, 2, 3, 4],
+    1: [0, 2, 9],
+    2: [0, 1, 3, 7],
+    3: [0, 2, 4, 5, 8],
+    4: [0, 3, 5, 6],
+    5: [4, 3, 8, 6],
+    6: [4, 5, 10],
+    7: [2, 8, 9],
+    8: [7, 3, 5, 10, 11],
+    9: [1, 7, 12],
+    10: [6, 8],
+    11: [8],
+    12: [9]
+}
+
+num_states = len(neighbors)
+population_size = 100
+generations = 500
+mutation_rate = 0.1
+
+def generate_individual(num_colors):
+    return [random.randint(1, num_colors) for _ in range(num_states)]
+
+def generate_population(num_colors):
+    return [generate_individual(num_colors) for _ in range(population_size)]
+
+def fitness(individual):
+    conflicts = 0
+    for state, adjacent in neighbors.items():
+        for neighbor in adjacent:
+            if individual[state] == individual[neighbor]:
+                conflicts += 1
+    return conflicts
+
+def selection(population):
+    selected = random.sample(population, 3)
+    selected.sort(key=fitness)
+    return selected[0]
+
+def crossover(parent1, parent2):
+    point = random.randint(1, num_states - 1)
+    return parent1[:point] + parent2[point:]
+
+def mutate(individual, num_colors):
+    new_ind = individual[:]
+    for i in range(num_states):
+        if random.random() < mutation_rate:
+            new_ind[i] = random.randint(1, num_colors)
+    return new_ind
+
+def genetic_algorithm(num_colors):
+    population = generate_population(num_colors)
+    for gen in range(generations):
+        population.sort(key=fitness)
+        best = population[0]
+        if fitness(best) == 0:
+            print(f"\n✅ Solución encontrada con {num_colors} colores en la generación {gen}")
+            return best
+        new_population = []
+        while len(new_population) < population_size:
+            p1 = selection(population)
+            p2 = selection(population)
+            child = crossover(p1, p2)
+            child = mutate(child, num_colors)
+            new_population.append(child)
+        population = new_population
+    return None  # No encontró solución con esta cantidad de colores
+
+for k in range(1, 5):
+    print(f"\n🎨 Probando con {k} colores")
+    solution = genetic_algorithm(k)
+    if solution and fitness(solution) == 0:
+        print("\n🖌️ Asignación de colores por estado:")
+        for i, color in enumerate(solution):
+            print(f"Estado {i}: Color {color}")
+        break
+else:
+    print("\n❌ No se pudo encontrar una solución sin conflictos con hasta 4 colores.")
